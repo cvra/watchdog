@@ -1,0 +1,10 @@
+depends:
+    - test-runner
+    - platform-abstraction
+
+source:
+    - watchdog.c
+
+tests:
+    - tests/watchdogs_test.cpp
+
