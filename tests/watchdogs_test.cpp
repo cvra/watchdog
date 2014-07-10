@@ -90,4 +90,23 @@ TEST(WatchdogTestGroup, WatchdogsFiresOnce)
     CHECK_EQUAL(1, call_counter);
 }
 
+TEST(WatchdogTestGroup, OnlyCorrectWatchdogFires)
+{
+    watchdog_register(&list, callback, 1);
+    watchdog_register(&list, NULL, 2); // crashes if fired
+
+    watchdog_list_tick(&list);
+    CHECK_EQUAL(1, call_counter);
+}
+
+TEST(WatchdogTestGroup, CanFireMultipleWatchdogs)
+{
+    watchdog_register(&list, callback, 1);
+    watchdog_register(&list, callback, 2);
+
+    watchdog_list_tick(&list);
+    watchdog_list_tick(&list);
+    CHECK_EQUAL(2, call_counter);
+}
+
 
