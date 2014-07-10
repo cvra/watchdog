@@ -38,3 +38,8 @@ void watchdog_list_tick(watchdog_list_t *list)
         }
     }
 }
+
+void watchdog_reset(watchdog_t *watchdog)
+{
+    watchdog->value = watchdog->reset_value;
+}

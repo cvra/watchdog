@@ -33,5 +33,8 @@ watchdog_t* watchdog_register(watchdog_list_t *list, void (*callback)(void), int
  */
 void watchdog_list_tick(watchdog_list_t *list);
 
+/** Resets a given watchdog counter. */
+void watchdog_reset(watchdog_t *watchdog);
+
 
 #endif

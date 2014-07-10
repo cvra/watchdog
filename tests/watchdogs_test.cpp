@@ -109,4 +109,21 @@ TEST(WatchdogTestGroup, CanFireMultipleWatchdogs)
     CHECK_EQUAL(2, call_counter);
 }
 
+TEST(WatchdogTestGroup, CanResetValue)
+{
+    watchdog_t *dog = watchdog_register(&list, callback, 10);
+    watchdog_list_tick(&list);
+    watchdog_reset(dog);
+    CHECK_EQUAL(10, dog->value);
+}
+
+TEST(WatchdogTestGroup, CanFireMultipleTimeIfReset)
+{
+    watchdog_t *dog = watchdog_register(&list, callback, 1);
+    watchdog_list_tick(&list);
+    watchdog_reset(dog);
+    watchdog_list_tick(&list);
+    CHECK_EQUAL(call_counter, 2);
+}
+
 
