@@ -8,6 +8,10 @@ If the operation task (A) deadlocks for example, the watchdog won't be reset and
 In this implementation, watchdogs are grouped together in a "list".
 The list is statically allocated and can hold up to `WATCHDOGS_PER_LIST` elements (currently 10).
 
+## Warning note about callbacks
+The callbacks may be fired from an interrupt or a critical section.
+That means they should not rely on any blocking operation or operating system service.
+
 ## Example
 
 ```cpp
@@ -32,4 +36,5 @@ void main(void)
     }
 }
 ```
+
 
