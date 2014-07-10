@@ -81,10 +81,11 @@ TEST(WatchdogTestGroup, WatchdogTickLowersCount)
     CHECK_EQUAL(4, dog2->value);
 }
 
-TEST(WatchdogTestGroup, WatchdogFiresIfCountReachesZero)
+TEST(WatchdogTestGroup, WatchdogsFiresOnce)
 {
     watchdog_register(&list, callback, 1);
 
+    watchdog_list_tick(&list);
     watchdog_list_tick(&list);
     CHECK_EQUAL(1, call_counter);
 }

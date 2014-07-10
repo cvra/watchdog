@@ -33,7 +33,7 @@ void watchdog_list_tick(watchdog_list_t *list)
     for (i=0;i<list->count;i++) {
         list->watchdogs[i].value --;
 
-        if (list->watchdogs[i].value <= 0) {
+        if (list->watchdogs[i].value == 0) {
             list->watchdogs[i].callback();
         }
     }
