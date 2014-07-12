@@ -1,4 +1,5 @@
 #include "CppUTest/TestHarness.h"
+#include "CppUTestExt/MockSupport.h"
 
 extern "C" {
 #include "../watchdog.h"
@@ -8,12 +9,12 @@ extern "C" {
 static int call_counter;
 static void callback(void)
 {
-    call_counter++;
+    mock().actualCall("callback");
 }
 
 static void panic_dummy(const char *file, int l, const char *msg)
 {
-    call_counter++;
+    mock().actualCall("PANIC");
 }
 
 TEST_GROUP(WatchdogTestGroup)
@@ -24,6 +25,11 @@ TEST_GROUP(WatchdogTestGroup)
     {
         watchdog_list_init(&list);
         call_counter = 0;
+    }
+
+    void teardown()
+    {
+        mock().clear();
     }
 };
 
@@ -60,13 +66,15 @@ TEST(WatchdogTestGroup, NewWatchdogIsConfiguredAccurately)
 TEST(WatchdogTestGroup, TooManyWatchdogsReturnNUll)
 {
     UT_PTR_SET(panic, panic_dummy);
+    mock().expectOneCall("PANIC");
 
     for (int i=0;i<WATCHDOGS_PER_LIST;i++) {
         watchdog_register(&list, callback, 10);
     }
 
     watchdog_register(&list, callback, 10);
-    CHECK_EQUAL(1, call_counter);
+
+    mock().checkExpectations();
 }
 
 TEST(WatchdogTestGroup, WatchdogTickLowersCount)
@@ -83,30 +91,36 @@ TEST(WatchdogTestGroup, WatchdogTickLowersCount)
 
 TEST(WatchdogTestGroup, WatchdogsFiresOnce)
 {
+    mock().expectOneCall("callback");
     watchdog_register(&list, callback, 1);
 
     watchdog_list_tick(&list);
     watchdog_list_tick(&list);
-    CHECK_EQUAL(1, call_counter);
+
+    mock().checkExpectations();
 }
 
 TEST(WatchdogTestGroup, OnlyCorrectWatchdogFires)
 {
+    mock().expectOneCall("callback");
     watchdog_register(&list, callback, 1);
     watchdog_register(&list, NULL, 2); // crashes if fired
 
     watchdog_list_tick(&list);
-    CHECK_EQUAL(1, call_counter);
+    mock().checkExpectations();
 }
 
 TEST(WatchdogTestGroup, CanFireMultipleWatchdogs)
 {
+    mock().expectOneCall("callback");
+    mock().expectOneCall("callback");
+
     watchdog_register(&list, callback, 1);
     watchdog_register(&list, callback, 2);
 
     watchdog_list_tick(&list);
     watchdog_list_tick(&list);
-    CHECK_EQUAL(2, call_counter);
+    mock().checkExpectations();
 }
 
 TEST(WatchdogTestGroup, CanResetValue)
@@ -120,10 +134,15 @@ TEST(WatchdogTestGroup, CanResetValue)
 TEST(WatchdogTestGroup, CanFireMultipleTimeIfReset)
 {
     watchdog_t *dog = watchdog_register(&list, callback, 1);
+
+    mock().expectOneCall("callback");
+    mock().expectOneCall("callback");
+
     watchdog_list_tick(&list);
     watchdog_reset(dog);
     watchdog_list_tick(&list);
-    CHECK_EQUAL(call_counter, 2);
+
+    mock().checkExpectations();
 }
 
 
