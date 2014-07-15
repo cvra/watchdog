@@ -174,4 +174,17 @@ TEST(WatchdogTestGroup, FailedAllocationIsAtomicToo)
     mock().checkExpectations();
 }
 
+TEST(WatchdogTestGroup, TickIsAtomic)
+{
+    watchdog_register(&list, NULL, 10);
+
+    criticalsection_use_capturing_mock();
+    mock().expectOneCall("CPU_CRITICAL_ENTER");
+    mock().expectOneCall("CPU_CRITICAL_EXIT");
+
+    watchdog_list_tick(&list);
+
+    mock().checkExpectations();
+}
+
 
