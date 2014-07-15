@@ -1,18 +1,18 @@
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
+#include "platform-abstraction/tests/criticalsection_capturing_mock.h"
 
 extern "C" {
 #include "../watchdog.h"
 #include "platform-abstraction/panic.h"
 }
 
-static int call_counter;
 static void callback(void)
 {
     mock().actualCall("callback");
 }
 
-static void panic_dummy(const char *file, int l, const char *msg)
+static void panic_mock(const char *file, int l, const char *msg)
 {
     mock().actualCall("PANIC");
 }
@@ -24,7 +24,6 @@ TEST_GROUP(WatchdogTestGroup)
     void setup()
     {
         watchdog_list_init(&list);
-        call_counter = 0;
     }
 
     void teardown()
@@ -65,7 +64,7 @@ TEST(WatchdogTestGroup, NewWatchdogIsConfiguredAccurately)
 
 TEST(WatchdogTestGroup, TooManyWatchdogsReturnNUll)
 {
-    UT_PTR_SET(panic, panic_dummy);
+    UT_PTR_SET(panic, panic_mock);
     mock().expectOneCall("PANIC");
 
     for (int i=0;i<WATCHDOGS_PER_LIST;i++) {
@@ -141,6 +140,36 @@ TEST(WatchdogTestGroup, CanFireMultipleTimeIfReset)
     watchdog_list_tick(&list);
     watchdog_reset(dog);
     watchdog_list_tick(&list);
+
+    mock().checkExpectations();
+}
+
+TEST(WatchdogTestGroup, AllocationIsAtomic)
+{
+    criticalsection_use_capturing_mock();
+    mock().expectOneCall("CPU_CRITICAL_ENTER");
+    mock().expectOneCall("CPU_CRITICAL_EXIT");
+
+    watchdog_register(&list, NULL, 10);
+
+    mock().checkExpectations();
+}
+
+
+TEST(WatchdogTestGroup, FailedAllocationIsAtomicToo)
+{
+    // Fills the list
+    for (int i = 0; i < WATCHDOGS_PER_LIST; ++i) {
+        watchdog_register(&list, NULL, 10);
+    }
+    UT_PTR_SET(panic, panic_mock);
+    criticalsection_use_capturing_mock();
+
+    mock().expectOneCall("CPU_CRITICAL_ENTER");
+    mock().expectOneCall("CPU_CRITICAL_EXIT");
+    mock().expectOneCall("PANIC");
+
+    watchdog_register(&list, NULL, 10);
 
     mock().checkExpectations();
 }
