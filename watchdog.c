@@ -35,19 +35,30 @@ watchdog_t* watchdog_register(watchdog_list_t *list, void (*callback)(void), int
 
 void watchdog_list_tick(watchdog_list_t *list)
 {
-    int i;
+    int i, max_count, expired;
 
     CRITICAL_SECTION_ALLOC();
 
     CRITICAL_SECTION_ENTER();
-    for (i=0;i<list->count;i++) {
-        list->watchdogs[i].value --;
+    max_count = list->count;
+    CRITICAL_SECTION_EXIT();
 
+    for (i=0;i<max_count;i++) {
+        CRITICAL_SECTION_ENTER();
+
+        list->watchdogs[i].value --;
         if (list->watchdogs[i].value == 0) {
+            expired = 1;
+        } else {
+            expired = 0;
+        }
+
+        CRITICAL_SECTION_EXIT();
+
+        if (expired) {
             list->watchdogs[i].callback();
         }
     }
-    CRITICAL_SECTION_EXIT();
 }
 
 void watchdog_reset(watchdog_t *watchdog)

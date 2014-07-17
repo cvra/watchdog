@@ -182,6 +182,11 @@ TEST(WatchdogTestGroup, TickIsAtomic)
     watchdog_register(&list, NULL, 10);
 
     criticalsection_use_capturing_mock();
+
+    /* We have one critical section for each registered watchdog, plus one at
+     * the beginning. */
+    mock().expectOneCall("CPU_CRITICAL_ENTER");
+    mock().expectOneCall("CPU_CRITICAL_EXIT");
     mock().expectOneCall("CPU_CRITICAL_ENTER");
     mock().expectOneCall("CPU_CRITICAL_EXIT");
 
