@@ -1,0 +1,26 @@
+language: cpp
+compiler:
+    - gcc
+    - clang
+
+before_install:
+    - sudo pip install pyaml jinja2
+    - git clone https://github.com/cpputest/cpputest ../cpputest
+    - pushd ../cpputest
+    - ./configure
+    - make
+    - sudo make install
+    - popd
+
+    - git clone https://github.com/cvra/packager ../packager
+
+before_script:
+    - ../packager/packager.py
+    - mkdir build/
+    - cd build/
+    - cmake ..
+    - make
+
+script:
+    - make
+    - ./tests
