@@ -3,9 +3,11 @@
 #include <platform-abstraction/criticalsection.h>
 #include "watchdog.h"
 
-void watchdog_list_init(watchdog_list_t *list)
+void watchdog_list_init(watchdog_list_t *list, watchdog_t *buffer, size_t buffer_len)
 {
     list->count = 0;
+    list->watchdogs = buffer;
+    list->max_count = buffer_len / sizeof(watchdog_t);
 }
 
 watchdog_t* watchdog_register(watchdog_list_t *list, void (*callback)(void), int reset_value)
@@ -14,7 +16,7 @@ watchdog_t* watchdog_register(watchdog_list_t *list, void (*callback)(void), int
     CRITICAL_SECTION_ALLOC();
 
     CRITICAL_SECTION_ENTER();
-    if (list->count == WATCHDOGS_PER_LIST) {
+    if (list->count == list->max_count) {
         PANIC("Watchdog list is full!");
         CRITICAL_SECTION_EXIT();
         return NULL;

@@ -1,8 +1,6 @@
 #ifndef WATCHDOG_H_
 #define WATCHDOG_H_
 
-#define WATCHDOGS_PER_LIST 10
-
 typedef struct {
     void (*callback)(void);
     int reset_value;
@@ -12,12 +10,15 @@ typedef struct {
 
 typedef struct {
     int count;
-    watchdog_t watchdogs[WATCHDOGS_PER_LIST];
-
+    int max_count;
+    watchdog_t *watchdogs;
 } watchdog_list_t;
 
-/** Inits a given watchdog list. */
-void watchdog_list_init(watchdog_list_t *list);
+/** Inits a given watchdog list.
+ * @param [in] buffer The memory buffer to use for the watchdog list.
+ * @param [in] buffer_len Number of bytes in the buffer.
+ * */
+void watchdog_list_init(watchdog_list_t *list, watchdog_t *buffer, size_t buffer_len);
 
 /** Register a watchdog timer.
  * @param callback The function to call when the watchdog resets.

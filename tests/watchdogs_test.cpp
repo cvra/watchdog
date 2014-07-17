@@ -7,6 +7,8 @@ extern "C" {
 #include "platform-abstraction/panic.h"
 }
 
+#define WATCHDOGS_PER_LIST 4
+
 static void callback(void)
 {
     mock().actualCall("callback");
@@ -20,10 +22,11 @@ static void panic_mock(const char *file, int l, const char *msg)
 TEST_GROUP(WatchdogTestGroup)
 {
     watchdog_list_t list;
+    watchdog_t dogs[WATCHDOGS_PER_LIST];
 
     void setup()
     {
-        watchdog_list_init(&list);
+        watchdog_list_init(&list, dogs, sizeof(dogs));
     }
 
     void teardown()
@@ -35,8 +38,8 @@ TEST_GROUP(WatchdogTestGroup)
 TEST(WatchdogTestGroup, CanInitList)
 {
     CHECK_EQUAL(0, list.count);
-    list.watchdogs[WATCHDOGS_PER_LIST-1].callback = callback;
-    POINTERS_EQUAL(callback, list.watchdogs[WATCHDOGS_PER_LIST-1].callback);
+    POINTERS_EQUAL(dogs, list.watchdogs);
+    CHECK_EQUAL(WATCHDOGS_PER_LIST, list.max_count);
 }
 
 TEST(WatchdogTestGroup, WatchdogIsAllocatedInStaticBuffer)
