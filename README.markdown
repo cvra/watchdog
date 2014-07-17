@@ -26,7 +26,8 @@ void callback(void)
 void main(void)
 {
     watchdog_list_t list;
-    watchdog_list_init(&list);
+    watchdog_t dogs[10];
+    watchdog_list_init(&list, dogs, sizeof(dogs));
 
     /* Creates a watchdog with a reset value of 5. */
     watchdog_register(&list, callback, 5);
