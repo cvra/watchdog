@@ -1,4 +1,5 @@
 # Software Watchdogs
+[![Build Status](https://travis-ci.org/cvra/watchdog.png)](https://travis-ci.org/cvra/watchdog)
 
 This module provides an implementation of software watchdogs.
 A watchdog is a simple decrementing counter which triggers a callback when it reaches zero.
