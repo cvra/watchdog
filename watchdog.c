@@ -24,11 +24,11 @@ watchdog_t* watchdog_register(watchdog_list_t *list, void (*callback)(void), int
 
     dog = &list->watchdogs[list->count];
     list->count++;
-    CRITICAL_SECTION_EXIT();
 
     dog->callback = callback;
     dog->reset_value = reset_value;
     dog->value = reset_value;
+    CRITICAL_SECTION_EXIT();
 
     return dog;
 }
