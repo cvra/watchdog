@@ -15,12 +15,12 @@ That means they should not rely on any blocking operation or operating system se
 ## Example
 
 ```cpp
-#include <stdio.h>
+#include <platform-abstraction/panic.h>
 #include <watchdog/watchdog.h>
 
 void callback(void)
 {
-    printf("Watchdog fired!\n");
+    PANIC("Watchdog fired!\n");
 }
 
 void main(void)
