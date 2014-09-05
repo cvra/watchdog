@@ -14,7 +14,7 @@ static void callback(void)
     mock().actualCall("callback");
 }
 
-static void panic_mock(const char *file, int l, const char *msg)
+static void panic_mock(const char *file, int l, const char *msg, ...)
 {
     mock().actualCall("PANIC");
 }
